@@ -5,7 +5,6 @@ import random
 import string
 import time
 
-from lsassy.impacketfile import ImpacketFile
 from lsassy.logger import lsassy_logger
 
 
@@ -85,7 +84,7 @@ class Dependency:
                     lsassy_logger.error(f"{self.name} upload error", exc_info=True)
                     return None
         else:
-            if not ImpacketFile.create_file(
+            if not session.correct_file_handler().create_file(
                 session, self.remote_share, self.remote_path, self.file, self.content
             ):
                 lsassy_logger.error(f"{self.name} upload error", exc_info=True)
@@ -95,7 +94,7 @@ class Dependency:
 
     def clean(self, session, timeout):
         if self.uploaded:
-            ImpacketFile.delete(session, self.remote_path + self.file, timeout=timeout)
+            session.correct_file_handler().delete(session, self.remote_path + self.file, timeout=timeout)
 
 
 class IDumpMethod:
@@ -160,7 +159,7 @@ class IDumpMethod:
 
     def __init__(self, session, timeout, time_between_commands, *args, **kwargs):
         self._session = session
-        self._file = ImpacketFile(self._session)
+        self._file = session.correct_file_handler()(self._session)
         self._file_handle = None
         self._executor_name = ""
         self._executor_path = ""
@@ -205,7 +204,7 @@ class IDumpMethod:
         return True
 
     def clean_file(self, remote_path, filename):
-        ImpacketFile.delete(
+        self._session.correct_file_handler().delete(
             self._session, remote_path + filename, timeout=self._timeout
         )
 
@@ -253,7 +252,7 @@ class IDumpMethod:
 
     def executor_clean(self):
         if self._executor_copied:
-            ImpacketFile.delete(
+            self._session.correct_file_handler().delete(
                 self._session,
                 self._executor_path + self._executor_name,
                 timeout=self._timeout,
