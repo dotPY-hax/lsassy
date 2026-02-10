@@ -195,6 +195,8 @@ class WinrmSession:
             password = password if not nthash else f"{lmhash}:{nthash}"
             auth = "ntlm" if not kerberos else "kerberos"
             self.smb_session = WinrmClient(server, port=port, username=username, password=password, auth=auth, cert_validation=False, ssl=False)
+            # if this fails the authentication has failed too
+            self.smb_session.execute_ps("whoami")
         except Exception as e:
             if "KDC_ERR_S_PRINCIPAL_UNKNOWN" in str(e):
                 lsassy_logger.error("Connection error (Use FQDN for kerberos authentication)", exc_info=True)

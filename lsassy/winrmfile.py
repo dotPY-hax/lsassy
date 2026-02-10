@@ -5,9 +5,7 @@ from os.path import exists
 import ntpath
 
 from pypsrp.exceptions import WinRMError
-
 from lsassy.session import WinrmSession
-
 from lsassy.logger import lsassy_logger
 
 
